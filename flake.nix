@@ -50,7 +50,7 @@
 
           packages = {
             inherit rhwp-wasm rhwp-studio rhwp-cli;
-            default = rhwp-studio;
+            default = rhwp-cli;
           };
 
           devShells.default = pkgs.mkShell {
