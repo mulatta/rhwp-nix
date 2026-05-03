@@ -36,10 +36,27 @@
         "type": "github"
       }
     },
+    "rhwp-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777592651,
+        "narHash": "sha256-wS85+CsYZUkRGHlHXUs3KsXLiOkjo4X95cNJyTNEPrE=",
+        "owner": "edwardkim",
+        "repo": "rhwp",
+        "rev": "0fb3e6758b8ad11d2f3c3849c83b914684e83863",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edwardkim",
+        "repo": "rhwp",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs",
+        "rhwp-src": "rhwp-src",
         "rust-overlay": "rust-overlay",
         "treefmt-nix": "treefmt-nix"
       }
