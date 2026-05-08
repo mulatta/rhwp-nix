@@ -6,7 +6,7 @@
 }:
 rustPlatform.buildRustPackage {
   pname = "rhwp-cli";
-  version = "0.7.8";
+  version = "0.7.10";
   src = rhwpSrc;
 
   cargoLock.lockFile = rhwpCargoLock;

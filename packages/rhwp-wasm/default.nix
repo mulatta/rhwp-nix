@@ -13,26 +13,26 @@ let
     targets = [ "wasm32-unknown-unknown" ];
   };
 
-  # rhwp Cargo.lock pins wasm-bindgen 0.2.120; nixpkgs only ships up to
-  # 0.2.118, and the bindgen/cli versions must match exactly. Build the
+  # rhwp Cargo.lock pins wasm-bindgen 0.2.121; nixpkgs lags behind, and the
+  # bindgen/cli versions must match exactly. Build the
   # matching cli locally.
   wasmBindgenCliSrc = fetchCrate {
     pname = "wasm-bindgen-cli";
-    version = "0.2.120";
-    hash = "sha256-Dkkx8Bhfk+y/jEz9Fzwytmv2N3Gj/7ST+5MlPRzzetU=";
+    version = "0.2.121";
+    hash = "sha256-ZOMgFNOcGkO66Jz/Z83eoIu+DIzo3Z/vq6Z5g6BDY/w=";
   };
   wasmBindgenCli = buildWasmBindgenCli {
     src = wasmBindgenCliSrc;
     cargoDeps = rustPlatform.fetchCargoVendor {
       src = wasmBindgenCliSrc;
       inherit (wasmBindgenCliSrc) pname version;
-      hash = "sha256-5Zu/Sh9aBMxB+KGC1MHWJAQ8PuE40M6lsenkpFEwJ6A=";
+      hash = "sha256-DPdCDPTAPBrbqLUqnCwQu1dePs9lGg85JCJOCIr9qjU=";
     };
   };
 in
 rustPlatform.buildRustPackage {
   pname = "rhwp-wasm";
-  version = "0.7.8";
+  version = "0.7.10";
   src = rhwpSrc;
 
   cargoLock.lockFile = rhwpCargoLock;

@@ -6,7 +6,7 @@
 }:
 buildNpmPackage {
   pname = "rhwp-studio";
-  version = "0.7.8";
+  version = "0.7.10";
   src = rhwpSrc;
   sourceRoot = "source/rhwp-studio";
 
