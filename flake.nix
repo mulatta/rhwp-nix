@@ -53,6 +53,10 @@
             default = rhwp-cli;
           };
 
+          checks = {
+            inherit rhwp-wasm rhwp-studio rhwp-cli;
+          };
+
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
               cargo
