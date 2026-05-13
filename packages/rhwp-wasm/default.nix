@@ -32,7 +32,7 @@ let
 in
 rustPlatform.buildRustPackage {
   pname = "rhwp-wasm";
-  version = "0.7.10";
+  version = "0.7.11";
   src = rhwpSrc;
 
   cargoLock.lockFile = rhwpCargoLock;
