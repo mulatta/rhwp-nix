@@ -39,11 +39,11 @@
     "rhwp-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1779040833,
-        "narHash": "sha256-hpR5wgp+4VUhEThc+DiNhSPV9m59grl3DOSNSqWZrqg=",
+        "lastModified": 1779810403,
+        "narHash": "sha256-li01DJCfxg6SWaNcsv2yU70McxFuQO8kwai3hKAbadk=",
         "owner": "edwardkim",
         "repo": "rhwp",
-        "rev": "1899ef9bc2dfd1c6c0c4d18b192d253a2d0a1fb5",
+        "rev": "b4ec1ecbde6446743fc62ed2d982b30f31f42f9c",
         "type": "github"
       },
       "original": {
