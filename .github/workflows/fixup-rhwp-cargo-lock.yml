@@ -1,0 +1,55 @@
+name: Fix up rhwp vendored artifacts
+# rhwp-src is consumed as a plain source with no committed Cargo.lock (upstream
+# gitignores it), so this repo vendors two artifacts derived from it:
+# lockfiles/rhwp-Cargo.lock and rhwp-studio's npmDepsHash. Renovate's nix
+# manager opens a PR that moves rhwp-src but leaves both stale, which breaks
+# rhwp-cli's --locked build and rhwp-studio's npm fetch. Renovate cannot
+# refresh them itself (Mend-hosted blocks postUpgradeTasks), so this does it on
+# the same Renovate PR, modeled on Mic92/sops-nix's update-vendor-hash workflow.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - flake.lock
+jobs:
+  fixup-vendored:
+    if: github.event.pull_request.user.login == 'renovate[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout PR head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Nix
+        uses: NixOS/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://nix-community.cachix.org https://cache.mulatta.io
+            extra-trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= cache.mulatta.io-1:DrV+Oy2azNyVKM7ihhD1QoOetRUnW+1G6RWToUpSO4U=
+      - name: Refresh vendored artifacts against the PR's rhwp-src
+        run: nix develop -c just refresh-vendored
+      - name: Commit refreshed artifacts if they changed
+        # No-op for non-rhwp-src bumps (rust-overlay, nixpkgs, ...): the lock and
+        # npm hash re-resolve identically, leave no diff, and nothing is pushed.
+        # The push triggers another `synchronize` run, but that one finds no diff
+        # and stops, so there is no loop.
+        run: |
+          if [[ -n "$(git status --porcelain lockfiles/rhwp-Cargo.lock packages/rhwp-studio/default.nix)" ]]; then
+            git config user.name "dots-flake-updater[bot]"
+            git config user.email "dots-flake-updater[bot]@users.noreply.github.com"
+            git add lockfiles/rhwp-Cargo.lock packages/rhwp-studio/default.nix
+            git commit -m "Refresh rhwp vendored artifacts for updated rhwp-src"
+            git push
+          else
+            echo "vendored artifacts unchanged; nothing to commit"
+          fi
