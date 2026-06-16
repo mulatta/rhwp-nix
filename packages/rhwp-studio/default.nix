@@ -10,7 +10,7 @@ buildNpmPackage {
   src = rhwpSrc;
   sourceRoot = "source/rhwp-studio";
 
-  npmDepsHash = "sha256-BPN8CP4VuqzteWw96pivnbmadSMsTScx8Bvkf94/om0=";
+  npmDepsHash = "sha256-NiuZBWSIi0IokJtfDMPrGYeXgWhTVQsXmOUeHteXSrw=";
 
   # rhwp-studio's vite.config.ts aliases `@wasm` to ../pkg, so the wasm bundle
   # must live next to the studio dir at build time. The unpacked source dir is
