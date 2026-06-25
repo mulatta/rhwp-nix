@@ -35,7 +35,6 @@
         let
           callPackage = pkgs.newScope {
             rhwpSrc = inputs.rhwp-src;
-            rhwpCargoLock = ./lockfiles/rhwp-Cargo.lock;
           };
           rhwp-wasm = callPackage ./packages/rhwp-wasm { };
           rhwp-cli = callPackage ./packages/rhwp-cli { };
