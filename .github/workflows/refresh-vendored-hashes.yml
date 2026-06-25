@@ -1,0 +1,58 @@
+name: Refresh vendored hashes
+# Two Nix fixed-output hashes are derived from rhwp-src but cannot live in
+# upstream, so Dependabot's flake.lock bump leaves them stale:
+#   - rhwp-studio's npmDepsHash (over rhwp-src's package-lock.json)
+#   - wasm-bindgen-cli's src + cargoVendor hashes (the cli version is derived
+#     from rhwp's Cargo.lock; nixpkgs lags it, so we build the cli ourselves)
+# nix-update recomputes both in place; refresh them on the same Dependabot PR.
+# (rhwp-cli/rhwp-wasm need no fixup: Cargo.lock is upstream-tracked.)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - flake.lock
+jobs:
+  refresh:
+    # Dependabot PRs run with a read-only token and no repo secrets; APP_ID and
+    # APP_PRIVATE_KEY must therefore live in the repo's *Dependabot* secrets.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Checkout PR head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup Nix
+        uses: NixOS/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://nix-community.cachix.org https://cache.mulatta.io
+            extra-trusted-public-keys = nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= cache.mulatta.io-1:DrV+Oy2azNyVKM7ihhD1QoOetRUnW+1G6RWToUpSO4U=
+      - name: Refresh vendored hashes against the PR's rhwp-src
+        run: nix run .#updater
+      - name: Commit refreshed hashes if they changed
+        # No-op for non-rhwp-src bumps (nixpkgs, rust-overlay, ...): the inputs
+        # re-resolve identically, leave no diff, and nothing is pushed. The push
+        # triggers another `synchronize` run that finds no diff and stops, so
+        # there is no loop.
+        run: |
+          paths=(packages/rhwp-studio/default.nix packages/wasm-bindgen-cli/default.nix)
+          if [[ -n "$(git status --porcelain "${paths[@]}")" ]]; then
+            git config user.name "dots-flake-updater[bot]"
+            git config user.email "dots-flake-updater[bot]@users.noreply.github.com"
+            git add "${paths[@]}"
+            git commit -m "Refresh vendored hashes for updated rhwp-src"
+            git push
+          else
+            echo "vendored hashes unchanged; nothing to commit"
+          fi

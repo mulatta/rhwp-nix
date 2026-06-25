@@ -40,6 +40,7 @@
           rhwp-wasm = callPackage ./packages/rhwp-wasm { inherit wasm-bindgen-cli; };
           rhwp-cli = callPackage ./packages/rhwp-cli { };
           rhwp-studio = callPackage ./packages/rhwp-studio { inherit rhwp-wasm; };
+          updater = callPackage ./packages/updater { };
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -49,19 +50,26 @@
           };
 
           packages = {
-            inherit rhwp-wasm rhwp-studio rhwp-cli;
+            inherit
+              rhwp-wasm
+              rhwp-studio
+              rhwp-cli
+              updater
+              ;
             default = rhwp-cli;
           };
 
           checks = {
-            inherit rhwp-wasm rhwp-studio rhwp-cli;
+            inherit
+              rhwp-wasm
+              rhwp-studio
+              rhwp-cli
+              updater
+              ;
           };
 
           devShells.default = pkgs.mkShell {
-            packages = with pkgs; [
-              cargo
-              just
-            ];
+            packages = [ pkgs.cargo ];
           };
 
           treefmt = {
