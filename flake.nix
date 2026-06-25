@@ -36,7 +36,8 @@
           callPackage = pkgs.newScope {
             rhwpSrc = inputs.rhwp-src;
           };
-          rhwp-wasm = callPackage ./packages/rhwp-wasm { };
+          wasm-bindgen-cli = callPackage ./packages/wasm-bindgen-cli { };
+          rhwp-wasm = callPackage ./packages/rhwp-wasm { inherit wasm-bindgen-cli; };
           rhwp-cli = callPackage ./packages/rhwp-cli { };
           rhwp-studio = callPackage ./packages/rhwp-studio { inherit rhwp-wasm; };
         in

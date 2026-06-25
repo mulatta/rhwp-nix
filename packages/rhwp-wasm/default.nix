@@ -1,32 +1,14 @@
 {
   lib,
   binaryen,
-  buildWasmBindgenCli,
-  fetchCrate,
   rhwpSrc,
   rust-bin,
   rustPlatform,
+  wasm-bindgen-cli,
 }:
 let
   rustToolchain = rust-bin.stable.latest.default.override {
     targets = [ "wasm32-unknown-unknown" ];
-  };
-
-  # rhwp Cargo.lock pins wasm-bindgen 0.2.125; nixpkgs lags behind, and the
-  # bindgen/cli versions must match exactly. Build the
-  # matching cli locally.
-  wasmBindgenCliSrc = fetchCrate {
-    pname = "wasm-bindgen-cli";
-    version = "0.2.125";
-    hash = "sha256-zRawtjxMOdTMX+mZaiNR3YYfTiZJhf9qj7kXSSeMxrc=";
-  };
-  wasmBindgenCli = buildWasmBindgenCli {
-    src = wasmBindgenCliSrc;
-    cargoDeps = rustPlatform.fetchCargoVendor {
-      src = wasmBindgenCliSrc;
-      inherit (wasmBindgenCliSrc) pname version;
-      hash = "sha256-aZCfgR23Qb0Pn4Mm4ToMtuuRQqSJjXCR9li/VvP5CTM=";
-    };
   };
 in
 rustPlatform.buildRustPackage {
@@ -38,7 +20,7 @@ rustPlatform.buildRustPackage {
 
   nativeBuildInputs = [
     rustToolchain
-    wasmBindgenCli
+    wasm-bindgen-cli
     binaryen
   ];
 
@@ -68,6 +50,10 @@ rustPlatform.buildRustPackage {
     wasm-opt -Oz -o $out/rhwp_bg.wasm $out/rhwp_bg.wasm
     runHook postInstall
   '';
+
+  # Exposed for the refresh-vendored-hashes workflow to target with nix-update
+  # without adding a build tool to the public packages output.
+  passthru.wasm-bindgen-cli = wasm-bindgen-cli;
 
   meta = {
     description = "rhwp WASM bundle (rhwp.js + rhwp_bg.wasm)";
